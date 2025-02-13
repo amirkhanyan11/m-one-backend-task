@@ -1,26 +1,47 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { UserService } from '../user/user.service';
+import { User } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
+import * as bcrypt from 'bcrypt';
+import { SignInDto } from './dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor(
+    private readonly userService: UserService,
+    private readonly prisma: PrismaService,
+    private readonly jwt: JwtService,
+  ) {}
+
+  async signup(user: User): Promise<User> {
+    return this.userService.create(user);
   }
 
-  findAll() {
-    return `This action returns all auth`;
-  }
+  async signin(siginDto: SignInDto): Promise<string> {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: siginDto.email,
+      },
+    });
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
+    const isPasswordCorrect = await bcrypt.compare(
+      siginDto.password,
+      user.password,
+    );
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+    if (!isPasswordCorrect) {
+      throw new BadRequestException('Wrong Password');
+    }
+
+    const payload = { id: user.id, email: user.email };
+
+    const token = await this.jwt.signAsync(payload);
+
+    return token;
   }
 }
