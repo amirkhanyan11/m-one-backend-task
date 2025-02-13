@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto, UpdateUserDto } from './dto';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { CreateUserDto, FindUserDto, UpdateUserDto } from './dto';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
-import { User } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -16,19 +16,47 @@ export class UserService {
     });
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async findWhere(user: User) {
+    return this.prisma.user.findMany({
+      where: user,
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findAll() {
+    return this.prisma.user.findMany({});
+  }
+
+  async findOne(id: number) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User does not exist');
+    }
+    return user;
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} user`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    try {
+      const user = await this.prisma.user.delete({
+        where: {
+          id,
+        },
+      });
+      return user;
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError) {
+        if (err.code === 'P2025') {
+          throw new BadRequestException('User does not exist');
+        }
+      }
+    }
   }
 }
