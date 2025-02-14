@@ -6,6 +6,8 @@ COPY package*.json .
 
 RUN npm install
 
+RUN npx prisma init
+
 COPY . .
 
-CMD ["npm", "run", "start"]
+CMD ["sh", "-c", "npx prisma migrate dev && npm run start"]
