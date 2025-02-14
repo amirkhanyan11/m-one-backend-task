@@ -22,4 +22,17 @@ model User {
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  friendOf Friendship[] @relation("friendOf")
+  friends  Friendship[] @relation("friends")
+}
+
+model Friendship {
+  status     String @default("pending")
+  friendOf   User   @relation("friendOf", fields: [friendOfId], references: [id])
+  friendOfId Int
+  friends    User   @relation("friends", fields: [friendsId], references: [id])
+  friendsId  Int
+
+  @@id([friendsId, friendOfId])
 }

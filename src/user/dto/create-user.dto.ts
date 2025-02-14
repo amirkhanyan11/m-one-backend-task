@@ -8,12 +8,22 @@ import {
   Length,
   Matches,
 } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {
+  @ApiProperty({
+    description: 'Email address, unique for everyone',
+    example: 'some@email.com',
+  })
   @IsString()
   @IsEmail()
   email: string;
 
+  @ApiProperty({
+    description:
+      'Should start with an uppercase character and contain only letters',
+    example: 'Michael',
+  })
   @IsString()
   @IsNotEmpty()
   @Length(1, 25)
@@ -23,6 +33,11 @@ export class CreateUserDto {
   })
   name: string;
 
+  @ApiProperty({
+    description:
+      'Should start with an uppercase character and contain only letters',
+    example: 'Jackson',
+  })
   @IsString()
   @IsNotEmpty()
   @Length(1, 25)
@@ -32,10 +47,19 @@ export class CreateUserDto {
   })
   surname: string;
 
+  @ApiProperty({
+    description:
+      'Strong password consisting of uppercase, lowercase character, at least one number and one symbol',
+    example: 'StrongPassword1337$$$',
+  })
   @IsString()
   @IsStrongPassword()
   password: string;
 
+  @ApiProperty({
+    description: 'Age of the user, must be positive a integer',
+    example: '22',
+  })
   @IsNumber()
   @IsPositive()
   age: number;
