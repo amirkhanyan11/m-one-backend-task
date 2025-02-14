@@ -24,4 +24,4 @@ The .env.example file is the same as my local .env, so feel free to use it
 
 ## Swagger
 
-There is a swagger documentation at http://localhost:3001 (assuming you're running the server on port 3001)
+There is a swagger documentation at http://localhost:3001/doc (assuming you're running the server on port 3001)
